@@ -1,5 +1,6 @@
 package org.zz.gmhelper.cert;
 
+import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -73,7 +74,8 @@ public class SM2PrivateKey extends BCECPrivateKey {
         try {
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(pub.getEncoded()));
 
-            return info.getPublicKeyData();
+            ASN1BitString publicKeyData = info.getPublicKeyData();
+            return new DERBitString(publicKeyData);
         } catch (IOException e) {   // should never happen
             return null;
         }

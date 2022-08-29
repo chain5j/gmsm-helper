@@ -1,5 +1,22 @@
 package org.zz.gmhelper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -31,6 +48,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
@@ -39,28 +57,11 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
 /**
  * 这个工具类的方法，也适用于其他基于BC库的ECC算法
  */
 public class BCECUtil {
+
     private static final String ALGO_NAME_EC = "EC";
     private static final String PEM_STRING_PUBLIC = "PUBLIC KEY";
     private static final String PEM_STRING_ECPRIVATEKEY = "EC PRIVATE KEY";
@@ -112,7 +113,7 @@ public class BCECUtil {
     }
 
     /**
-     * @param dHex             十六进制字符串形式的私钥d值，如果是SM2算法，Hex字符串长度应该是64（即32字节）
+     * @param dHex 十六进制字符串形式的私钥d值，如果是SM2算法，Hex字符串长度应该是64（即32字节）
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -122,7 +123,7 @@ public class BCECUtil {
     }
 
     /**
-     * @param dBytes           字节数组形式的私钥d值，如果是SM2算法，应该是32字节
+     * @param dBytes 字节数组形式的私钥d值，如果是SM2算法，应该是32字节
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -132,7 +133,7 @@ public class BCECUtil {
     }
 
     /**
-     * @param d                大数形式的私钥d值
+     * @param d 大数形式的私钥d值
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -154,9 +155,9 @@ public class BCECUtil {
     }
 
     /**
-     * @param x                大数形式的公钥x分量
-     * @param y                大数形式的公钥y分量
-     * @param curve            EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
+     * @param x 大数形式的公钥x分量
+     * @param y 大数形式的公钥y分量
+     * @param curve EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -166,9 +167,9 @@ public class BCECUtil {
     }
 
     /**
-     * @param xHex             十六进制形式的公钥x分量，如果是SM2算法，Hex字符串长度应该是64（即32字节）
-     * @param yHex             十六进制形式的公钥y分量，如果是SM2算法，Hex字符串长度应该是64（即32字节）
-     * @param curve            EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
+     * @param xHex 十六进制形式的公钥x分量，如果是SM2算法，Hex字符串长度应该是64（即32字节）
+     * @param yHex 十六进制形式的公钥y分量，如果是SM2算法，Hex字符串长度应该是64（即32字节）
+     * @param curve EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -179,9 +180,9 @@ public class BCECUtil {
     }
 
     /**
-     * @param xBytes           十六进制形式的公钥x分量，如果是SM2算法，应该是32字节
-     * @param yBytes           十六进制形式的公钥y分量，如果是SM2算法，应该是32字节
-     * @param curve            EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
+     * @param xBytes 十六进制形式的公钥x分量，如果是SM2算法，应该是32字节
+     * @param yBytes 十六进制形式的公钥y分量，如果是SM2算法，应该是32字节
+     * @param curve EC曲线参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#CURVE}
      * @param domainParameters EC Domain参数，一般是固定的，如果是SM2算法的可参考{@link SM2Util#DOMAIN_PARAMS}
      * @return
      */
@@ -356,6 +357,45 @@ public class BCECUtil {
     }
 
     /**
+     * 将16进制的私钥转换为BCECPrivateKey对象
+     *
+     * @param prvKeyHex
+     * @return
+     * @throws Exception
+     */
+    public static BCECPrivateKey convertHexToBCECPrivateKey(String prvKeyHex)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        BigInteger privateKeyBigInteger = Util.toBigInt(prvKeyHex);
+        ECDomainParameters domainParams = SM2Util.DOMAIN_PARAMS;
+        ECParameterSpec parameterSpec = new ECParameterSpec(domainParams.getCurve(), domainParams.getG(),
+                domainParams.getN(), domainParams.getH());
+
+        ECPrivateKeySpec keySpec = new ECPrivateKeySpec(privateKeyBigInteger, parameterSpec);
+        KeyFactory keyf = KeyFactory.getInstance(ALGO_NAME_EC);
+        return (BCECPrivateKey) keyf.generatePrivate(keySpec);
+    }
+
+    /**
+     * 将16进制的公钥转为BCECPublicKey
+     *
+     * @param pubKeyHex
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
+    public static BCECPublicKey convertHexToBCECPublicKey(String pubKeyHex)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        BigInteger pubKeyBigInteger = Util.toBigInt(pubKeyHex);
+        ECDomainParameters domainParams = SM2Util.DOMAIN_PARAMS;
+        ECParameterSpec parameterSpec = new ECParameterSpec(domainParams.getCurve(), domainParams.getG(),
+                domainParams.getN(), domainParams.getH());
+
+        ECPrivateKeySpec keySpec = new ECPrivateKeySpec(pubKeyBigInteger, parameterSpec);
+        KeyFactory keyf = KeyFactory.getInstance(ALGO_NAME_EC);
+        return (BCECPublicKey) keyf.generatePublic(keySpec);
+    }
+
+    /**
      * 将ECC公钥对象转换为X509标准的字节流
      *
      * @param pubKey
@@ -510,5 +550,33 @@ public class BCECUtil {
         } finally {
             pRdr.close();
         }
+    }
+
+    /**
+     * 从私钥中获取公钥的point
+     *
+     * @param privKey
+     * @return
+     */
+    public ECPoint publicPointFromPrivate(BigInteger privKey) {
+        ECPrivateKeyParameters keyParameters = BCECUtil.createECPrivateKeyParameters(privKey, SM2Util.DOMAIN_PARAMS);
+        ECDomainParameters domainParameters = keyParameters.getParameters();
+        return (new FixedPointCombMultiplier()).multiply(domainParameters.getG(), keyParameters.getD());
+    }
+
+    /**
+     * 将publicKey转换为gmsm对应的公钥内容
+     *
+     * @param point
+     * @return
+     */
+    public static byte[] publicKeyBytes(ECPoint point) {
+        byte[] publicKeyBytes = point.getEncoded(true);
+        if (publicKeyBytes[0] == (byte) 0x03) {
+            publicKeyBytes[0] = (byte) 0x01;
+        } else {
+            publicKeyBytes[0] = (byte) 0x00;
+        }
+        return publicKeyBytes;
     }
 }
