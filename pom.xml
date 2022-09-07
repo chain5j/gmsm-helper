@@ -18,6 +18,26 @@
         <tag>${project.version}</tag>
     </scm>
 
+    <description>gmsm-helper使用java实现gmsm国密算法。</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License</name>
+            <url>http://www.apache.org/licenses/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>ZZMarquis</name>
+            <email>445336534@qq.com</email>
+        </developer>
+        <developer>
+            <name>xwc1125</name>
+            <email>xwc1125@qq.com</email>
+        </developer>
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bouncycastle.version>1.70</bouncycastle.version>
@@ -104,8 +124,8 @@
                         <version>1.6.7</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>sonatype-nexus-snapshots</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <serverId>oss</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
